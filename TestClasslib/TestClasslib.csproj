@@ -4,4 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TestClasslib2\TestClasslib2.csproj" />
+    <ProjectReference Include="..\TestClasslib3\TestClasslib3.csproj" />
+  </ItemGroup>
+
 </Project>

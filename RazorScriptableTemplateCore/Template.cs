@@ -84,31 +84,33 @@ namespace RazorScriptableTemplateCore
             // now, use roslyn, parse the C# code
             var tree = CSharpSyntaxTree.ParseText(cs.GeneratedCode);
 
-            var fixedReferences = new[]
-            {
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // include corlib
-                MetadataReference.CreateFromFile(typeof(RazorCompiledItemAttribute).Assembly.Location), // include Microsoft.AspNetCore.Razor.Runtime
-                MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location), // this DLL (that contains the MyTemplate base class)
+			var uniqueAssemblies = new HashSet<string>
+			{
+				typeof(object).Assembly.Location, // include corlib
+                typeof(RazorCompiledItemAttribute).Assembly.Location, // include Microsoft.AspNetCore.Razor.Runtime
+                Assembly.GetExecutingAssembly().Location, // this DLL (that contains the MyTemplate base class)
 
                 // for some reason on .NET core, I need to add this... this is not needed with .NET framework
-                MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "System.Runtime.dll")),
+                Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "System.Runtime.dll"),
 
                 // as found out by @Isantipov, for some other reason on .NET Core for Mac and Linux, we need to add this... this is not needed with .NET framework
-                MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"))
-            };
+                Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll")
+			};
 
-            //sidtodo this list needs to be unique.
-            var fullAssemblyList = new List<PortableExecutableReference>();
-            fullAssemblyList.AddRange(fixedReferences);
-            fullAssemblyList.AddRange(dynamicAssemblies.Select(iterLocation =>
+            foreach (var assembly in dynamicAssemblies)
+			{
+                uniqueAssemblies.Add(assembly);
+            }
+
+            var metaDataReferenceList = uniqueAssemblies.Select(assembly =>
             {
-                return MetadataReference.CreateFromFile(iterLocation);
-            }));
+                return MetadataReference.CreateFromFile(assembly);
+            });
 
             var assemblyFn = Path.GetRandomFileName();
 
             // define the dll
-            return CSharpCompilation.Create(assemblyFn, new[] { tree }, fullAssemblyList,
+            return CSharpCompilation.Create(assemblyFn, new[] { tree }, metaDataReferenceList,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         }
 

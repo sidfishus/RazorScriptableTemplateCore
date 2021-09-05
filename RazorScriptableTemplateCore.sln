@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RazorScriptableTemplateCore
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClasslib", "TestClasslib\TestClasslib.csproj", "{73B25E78-A260-4DE3-BAFB-387CE87E2AB7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClasslib2", "TestClasslib2\TestClasslib2.csproj", "{1D4507FB-A1CA-4EEC-82C2-495E1DC01E0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClasslib3", "TestClasslib3\TestClasslib3.csproj", "{D03A38AA-109D-410C-A579-CE24D6561801}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{73B25E78-A260-4DE3-BAFB-387CE87E2AB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73B25E78-A260-4DE3-BAFB-387CE87E2AB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73B25E78-A260-4DE3-BAFB-387CE87E2AB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D4507FB-A1CA-4EEC-82C2-495E1DC01E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D4507FB-A1CA-4EEC-82C2-495E1DC01E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D4507FB-A1CA-4EEC-82C2-495E1DC01E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D4507FB-A1CA-4EEC-82C2-495E1DC01E0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D03A38AA-109D-410C-A579-CE24D6561801}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D03A38AA-109D-410C-A579-CE24D6561801}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D03A38AA-109D-410C-A579-CE24D6561801}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D03A38AA-109D-410C-A579-CE24D6561801}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
