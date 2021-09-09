@@ -11,7 +11,9 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-//sidtodo credits: https://stackoverflow.com/questions/38247080/using-razor-outside-of-mvc-in-net-core
+// Credits to Simon Mourier: https://stackoverflow.com/questions/38247080/using-razor-outside-of-mvc-in-net-core
+// Most of this is his. I have adapted it so it can be used as a library, and also improved the way it emits and
+// then loads the assembly by using a stream instead of a physical file.
 namespace RazorScriptableTemplateCore
 {
     public class Template<MODEL> : IDisposable
@@ -21,6 +23,31 @@ namespace RazorScriptableTemplateCore
 
         public Template(string templatePath,
             string templateFilename,
+            IEnumerable<string> dynamicAssemblies)
+        {
+            
+            // Compile and emit to a stream
+            using (var memoryStream = new MemoryStream())
+            {
+                var compilation = PrepareRazorCompile(templatePath, templateFilename, dynamicAssemblies);
+                var result = compilation.Emit(memoryStream);
+                if (!result.Success)
+                {
+                    throw new Exception(string.Join(Environment.NewLine, result.Diagnostics));
+                }
+                // Reset the position - important otherwise loading the assembly from a stream will fail.
+                memoryStream.Position = 0;
+
+                _AssemblyLoadContext = new AssemblyLoadContext(null, true);
+                var assembly = _AssemblyLoadContext.LoadFromStream(memoryStream);
+
+                // the generated type is defined in our custom namespace which we specified in 'builder.SetNamespace'.
+                // "Template" is the type name that razor uses by default.
+                _Writer = (TemplateWriter<MODEL>)Activator.CreateInstance(assembly.GetType("RazorTemplate.Template"));
+            }
+        }
+
+        private static Compilation PrepareRazorCompile(string templatePath,string templateFilename,
             IEnumerable<string> dynamicAssemblies)
         {
             var fs = RazorProjectFileSystem.Create(templatePath);
@@ -33,7 +60,6 @@ namespace RazorScriptableTemplateCore
             });
 
             // Loads the template.
-
             var item = fs.GetItem(templateFilename, null);
 
             // parse and generate C# code
@@ -69,27 +95,8 @@ namespace RazorScriptableTemplateCore
             var assemblyFn = Path.GetRandomFileName();
 
             // define the dll
-            var compilation = CSharpCompilation.Create(assemblyFn, new[] { tree },fullAssemblyList,
+            return CSharpCompilation.Create(assemblyFn, new[] { tree }, fullAssemblyList,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-            // Compile and emit to a stream
-            var memoryStream = new MemoryStream();
-            var result = compilation.Emit(memoryStream);
-            if (!result.Success)
-            {
-                throw new Exception(string.Join(Environment.NewLine, result.Diagnostics));
-            }
-            // Reset the position - important otherwise loading the assembly from a stream will cause it to break.
-            memoryStream.Position = 0;
-
-            _AssemblyLoadContext = new AssemblyLoadContext(null, true);
-            var assembly = _AssemblyLoadContext.LoadFromStream(memoryStream);
-
-            // Not needed
-            memoryStream.Dispose();
-
-            // the generated type is defined in our custom namespace, as we asked. "Template" is the type name that razor uses by default.
-            _Writer = (TemplateWriter<MODEL>)Activator.CreateInstance(assembly.GetType("RazorTemplate.Template"));
         }
 
         public string Execute(MODEL model)
@@ -99,7 +106,8 @@ namespace RazorScriptableTemplateCore
 
         void IDisposable.Dispose()
         {
-            // This helps the generated assembly be unloaded. It's a work around for the fact that you can't
+            // This helps the generated assembly be unloaded and free up the resources.
+            // It's a work around for the fact that you can't
             // unload assemblies directly in .NET 5.0 because secondary app domains are not supported:
             // https://stackoverflow.com/questions/27266907/no-appdomains-in-net-core-why
             _Writer = null;

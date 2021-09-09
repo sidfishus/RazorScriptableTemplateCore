@@ -4,10 +4,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Threading;
 
-//sidtodo what if it references models in another DLL??? test this.
-
-//sidtodo test with additional using statements?? assemblies??
-
 namespace Testing
 {
 
@@ -30,8 +26,6 @@ namespace Testing
     {
         static void Main(string[] args)
         {
-
-            var assemblies=Helpers.GetListOfAssembliesForType<MyModel>();
 
 
             //sidtodo remove
@@ -58,7 +52,12 @@ namespace Testing
                 const int COUNT = 1;
                 for (int i = 0; i < COUNT; ++i)
                 {
-                    using (var template = new Template<MyModel>(".", "razorTemplate.rt", Helpers.GetListOfAssembliesForType<MyModel>()))
+                    //TODO: auto get the list of associated assemblies
+                    //using (var template = new Template<MyModel>(".", "razorTemplate.rt", Helpers.GetListOfAssembliesForType<MyModel>()))
+                    using (var template = new Template<MyModel>(".", "razorTemplate.rt",
+                        new[]{ TemplateHelpers.GetLocationForType<MyModel>(),
+                            TemplateHelpers.GetLocationForType<TestClasslib.Class1>() })
+                    )
                     {
 
                         string[] names = new string[] { "Chris", "John", "Sam" };
@@ -67,7 +66,7 @@ namespace Testing
                         {
                             var model = new MyModel();
                             model.Name = iterName;
-                            model.NestedClass = new TestClasslib.Class1 { Property="Test"};
+                            model.NestedClass = new TestClasslib.Class1 { Property = "Test" };
                             var output = template.Execute(model);
                             Console.WriteLine(output);
                         });

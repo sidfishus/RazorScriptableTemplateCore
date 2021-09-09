@@ -6,15 +6,21 @@ using System.Threading.Tasks;
 
 namespace RazorScriptableTemplateCore
 {
-    public static class Helpers
+    public static class TemplateHelpers
     {
+        //sidtodo: This is unfinished.
         public static IList<string> GetListOfAssembliesForType<TYPE>()
         {
-            var thisTypeInfo = typeof(TYPE);
             var rv = new List<string>();
-            rv.Add(thisTypeInfo.Assembly.Location);
+            rv.Add(GetLocationForType<TYPE>());
 
             return rv;
+        }
+
+        public static string GetLocationForType<TYPE>()
+        {
+            var thisTypeInfo = typeof(TYPE);
+            return thisTypeInfo.Assembly.Location;
         }
     }
 }
