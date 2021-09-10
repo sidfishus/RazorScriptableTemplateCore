@@ -20,30 +20,19 @@ namespace Testing
             get;
             set;
         }
+
+        string _PrivateVariable="";
+
+        public string GetPrivateVariable()
+        {
+            return _PrivateVariable;
+        }
     }
 
     class Program
     {
         static void Main(string[] args)
         {
-
-
-            //sidtodo remove
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            foreach (var type in assembly.GetTypes())
-            {
-                Console.WriteLine(type.Name);
-            }
-
-
-            //foreach (var assemblyName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-            //{
-            //    Assembly assembly = Assembly.Load(assemblyName);
-            //    foreach (var type in assembly.GetTypes())
-            //    {
-            //        Console.WriteLine(type.Name);
-            //    }
-            //}
 
             try
             {
@@ -52,12 +41,13 @@ namespace Testing
                 const int COUNT = 1;
                 for (int i = 0; i < COUNT; ++i)
                 {
-                    //TODO: auto get the list of associated assemblies
-                    //using (var template = new Template<MyModel>(".", "razorTemplate.rt", Helpers.GetListOfAssembliesForType<MyModel>()))
                     using (var template = new Template<MyModel>(".", "razorTemplate.rt",
-                        new[]{ TemplateHelpers.GetLocationForType<MyModel>(),
-                            TemplateHelpers.GetLocationForType<TestClasslib.Class1>() })
+                        TemplateHelpers.GetListOfAssembliesForTypeRecursive<MyModel>())
                     )
+                    //using (var template = new Template<MyModel>(".", "razorTemplate.rt",
+                    //    new[]{ TemplateHelpers.GetLocationForType<MyModel>(),
+                    //        TemplateHelpers.GetLocationForType<TestClasslib.Class1>() })
+                    //)
                     {
 
                         string[] names = new string[] { "Chris", "John", "Sam" };

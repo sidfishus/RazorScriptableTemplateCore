@@ -16,6 +16,15 @@ using System.Runtime.Loader;
 // then loads the assembly by using a stream instead of a physical file.
 namespace RazorScriptableTemplateCore
 {
+    // Useage for example:
+    // var template=new Template<YourModel>("C:\\temp", "yourRazorTemplate.temp",
+    //  TemplateHelpers.GetListOfAssembliesForType<YourModel>());
+    // var yourModel=new YourModel();
+    // ...
+    // var output=template.Execute(yourModel);
+    //
+    // The template file must contain '@inherits RazorScriptableTemplateCore.TemplateWriter<Testing.MyModel>'
+    // at the top otherwise it will not work.
     public class Template<MODEL> : IDisposable
     {
         TemplateWriter<MODEL> _Writer;
@@ -38,7 +47,9 @@ namespace RazorScriptableTemplateCore
                 // Reset the position - important otherwise loading the assembly from a stream will fail.
                 memoryStream.Position = 0;
 
-                _AssemblyLoadContext = new AssemblyLoadContext(null, true);
+                // We load the assembly in a special way. The 'true' parameter specifies that the assembly can be
+                // unloaded. See the 'Dispose' method for more details.
+                _AssemblyLoadContext = new AssemblyLoadContext(null, true /* This is the key bit */);
                 var assembly = _AssemblyLoadContext.LoadFromStream(memoryStream);
 
                 // the generated type is defined in our custom namespace which we specified in 'builder.SetNamespace'.
@@ -55,7 +66,8 @@ namespace RazorScriptableTemplateCore
             // customize the default engine a little bit
             var engine = RazorProjectEngine.Create(RazorConfiguration.Default, fs, (builder) =>
             {
-                // InheritsDirective.Register(builder); // in .NET core 3.1, compatibility has been broken (again), and this is not needed anymore...
+                // in .NET core 3.1, compatibility has been broken (again), and this is not needed anymore...
+                // InheritsDirective.Register(builder);
                 builder.SetNamespace("RazorTemplate"); // define a namespace for the Template class
             });
 
@@ -85,6 +97,7 @@ namespace RazorScriptableTemplateCore
                 MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll"))
             };
 
+            //sidtodo this list needs to be unique.
             var fullAssemblyList = new List<PortableExecutableReference>();
             fullAssemblyList.AddRange(fixedReferences);
             fullAssemblyList.AddRange(dynamicAssemblies.Select(iterLocation =>
