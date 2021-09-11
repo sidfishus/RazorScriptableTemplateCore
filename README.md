@@ -11,10 +11,14 @@ using (var template = new Template<MyModel>(".", "razorTemplate.rt",
 {
   var model = new MyModel();
   model.Name = iterName;
-  model.NestedClass = new TestClasslib.Class1 { Property = "Test" };
-  model.NestedClass.AggregatedProperty = new TestClasslib2.Class1 { Property = "Test classlib2" };
+  model.NestedClass =
+    new TestClasslib.Class1 { Property = "Test" };
+  model.NestedClass.AggregatedProperty =
+    new TestClasslib2.Class1 { Property = "Test classlib2" };
   model.NestedClass.ListOfAggregatedProperty = new List<TestClasslib3.Class1>();
-  model.NestedClass.ListOfAggregatedProperty.Add(new TestClasslib3.Class1 { Property="Aggregated Property from index 0" });
+  model.NestedClass.ListOfAggregatedProperty.Add(
+    new TestClasslib3.Class1 { Property="Aggregated Property from index 0" }
+  );
   var output = template.Execute(model);
   Console.WriteLine(output);
 }
