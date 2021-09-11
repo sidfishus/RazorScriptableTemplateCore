@@ -6,17 +6,19 @@ I have taken Simon's work to leverage the Razor SDK to create templates outside 
 
 ```
 using (var template = new Template<MyModel>(".", "razorTemplate.rt",
-  new[]{ TemplateHelpers.GetLocationForType<MyModel>(),
-    TemplateHelpers.GetLocationForType<TestClasslib.Class1>() })
+  TemplateHelpers.GetListOfAssembliesForTypeRecursive<MyModel>())
 )
 {
   var model = new MyModel();
   model.Name = iterName;
   model.NestedClass = new TestClasslib.Class1 { Property = "Test" };
+  model.NestedClass.AggregatedProperty = new TestClasslib2.Class1 { Property = "Test classlib2" };
+  model.NestedClass.ListOfAggregatedProperty = new List<TestClasslib3.Class1>();
+  model.NestedClass.ListOfAggregatedProperty.Add(new TestClasslib3.Class1 { Property="Aggregated Property from index 0" });
   var output = template.Execute(model);
   Console.WriteLine(output);
 }
                             
 ```
 
-I'm still working on adding the ability to get the list of assemblies that a given type uses. For example when you have a model class that has a nested type which is in another assembly, add the ability to automatically get from the parent type to the nested/child assembly.
+I've improved the way it emits and then loads the dynamically generated assembly by using a stream instead of a physical file, and found a way to unload the assemblies once the templates they were generated for via Dispose.
